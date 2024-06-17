@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using clothes.api.Common;
 using clothes.api.Common.Seedworks;
 using clothes.api.Common.Settings;
 using clothes.api.Dtos.User;
@@ -10,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace clothes.api.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class UserController : BaseController
     {
         private readonly IMapper _mapper;
@@ -44,7 +47,6 @@ namespace clothes.api.Controllers
             return Ok(new LoginResponeDto(token, _mapper.Map<UserDto>(user)));
         }
 
-        [AllowAnonymous]
         [HttpPost("signUp")]
         public IActionResult SignUp([FromBody] SignUpDto input)
         {
@@ -55,9 +57,49 @@ namespace clothes.api.Controllers
                 Email = input.Email,
                 PhoneNumber = input.PhoneNumber,
                 Password = BCrypt.Net.BCrypt.HashPassword(input.Password),
+                LastUpdate=DateTime.Now,
             });
 
             return Ok(_mapper.Map<UserDto>(user));
+        }
+
+        [HttpPut("updateInfo")]
+        public IActionResult UpdateInfo([FromBody] UpdateInfoDto value)
+        {
+            var user = _userRepo
+               .GetQueryable()
+               .FirstOrDefault(x => x.Id== LoggingUserId)
+                    ?? throw new ApplicationException("User does not exist");
+
+            user.FullName = value.FullName;
+            user.Email = value.Email;
+            user.PhoneNumber = value.PhoneNumber;
+            user.Gender = value.Gender;
+            user.LastUpdate = DateTime.Now;
+            user.Avatar = !string.IsNullOrEmpty(value.Avatar) ? value.Avatar : null;
+            _userRepo.SaveChanges();
+
+            return Ok(_mapper.Map<UserDto>(user));
+        }
+        [AllowAnonymous]
+        [HttpPut("resetPassword")]
+        public IActionResult ResetPassword([FromBody] ResetPasswordDto value)
+        {
+            var user = _userRepo
+               .GetQueryable()
+               .FirstOrDefault(x => x.Id == 1)
+                    ?? throw new ApplicationException("User does not exist");
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(value.Password);
+            _userRepo.SaveChanges();
+
+            return Ok(_mapper.Map<UserDto>(user));
+        }
+
+        [HttpDelete("{id}")]
+        public void Delete()
+        {
+
         }
     }
 }

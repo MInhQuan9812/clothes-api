@@ -66,7 +66,7 @@ namespace clothes.api.Common.Extensions
                     Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.Http,
+                    Type = SecuritySchemeType.ApiKey,
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                 });
@@ -85,6 +85,7 @@ namespace clothes.api.Common.Extensions
                                         new string[] { }
                                     }
                                 });
+                c.OperationFilter<AuthorizeCheckOperationFilter>();
             });
             return services;
         }
@@ -108,7 +109,8 @@ namespace clothes.api.Common.Extensions
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = configuration["JWT:ValidAudience"],
+                    ValidateLifetime = true,
+                    ValidAudience = configuration["JWT:ValidIssuser"],
                     ValidIssuer = configuration["JWT:ValidIssuser"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Secret"]))
                 };

@@ -58,3 +58,4 @@ C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\Microsof
 C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\Newtonsoft.Json.dll
 C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\Newtonsoft.Json.Bson.dll
 C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\BCrypt.Net-Next.dll
+C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\obj\Debug\net7.0\clothes.api.sourcelink.json

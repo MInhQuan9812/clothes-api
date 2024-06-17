@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Security.Claims;
 
 namespace clothes.api.Controllers
 {
@@ -23,6 +24,7 @@ namespace clothes.api.Controllers
                 StatusCode = StatusCodes.Status200OK
             });
         }
+        protected int LoggingUserId => int.Parse(_httpContext.User.FindFirstValue("id"));
 
     }
 }

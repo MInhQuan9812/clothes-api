@@ -38,7 +38,7 @@ namespace clothes.api.Common.Settings
                 }),
                 Expires=DateTime.UtcNow.AddDays(_jwtSetting.ExpiryDays),
                 SigningCredentials=signingCredentials,
-                Audience=_jwtSetting.ValidAudience,
+                Audience=_jwtSetting.ValidIssuer,
                 Issuer=_jwtSetting.ValidIssuer,
             };
 

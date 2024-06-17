@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace clothes.api.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
     [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
