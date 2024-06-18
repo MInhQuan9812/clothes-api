@@ -4,6 +4,7 @@ using clothes.api.Dtos.Options;
 using clothes.api.Instrafructure.Entities;
 using clothes.api.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace clothes.api.Controllers
 {
@@ -12,22 +13,26 @@ namespace clothes.api.Controllers
     public class OptionController : BaseController
     {
         private readonly IRepository<Option> _optionRepo;
+        private readonly IRepository<OptionValue> _optionValueRepo;
         private readonly IMapper _mapper;
 
         public OptionController(
             IMapper mapper,
             IRepository<Option> optionRepo,
+            IRepository<OptionValue> optionValueRepo,
             IHttpContextAccessor httpContextAccessor
             ) : base(httpContextAccessor)
         {
             _mapper = mapper;
             _optionRepo = optionRepo;
+            _optionValueRepo = optionValueRepo;
         }
 
         [HttpGet]
         public IActionResult GetAllOption()
         {
             var queryClause = _optionRepo.GetQueryableNoTracking()
+
                                          .Where(x => !x.IsDeleted);
             var options = new List<Option>();
 
@@ -35,6 +40,8 @@ namespace clothes.api.Controllers
 
             return Ok(_mapper.Map<ICollection<OptionDto>>(options));
         }
+
+
 
         [HttpPost("createOption")]
         public IActionResult CreateCategory([FromBody] CreateOptionDto dto)
@@ -75,6 +82,25 @@ namespace clothes.api.Controllers
 
             _optionRepo.Delete(category);
             return Ok();
+        }
+
+        [HttpPost("addValueToOption/{id}")]
+        public IActionResult AddValueToOption(int id, [FromBody] AddValueToOptionDto dto)
+        {
+            var option = _optionRepo
+                .GetQueryableNoTracking()
+                .FirstOrDefault(x => x.Id.Equals(id) && !x.IsDeleted)
+                ?? throw new ApplicationException("Option is not exist");
+
+            if (_optionValueRepo.GetQueryableNoTracking().FirstOrDefault
+                (
+                    x => x.OptionId == option.Id && x.Value == dto.Value && !x.IsDeleted) != null
+                )
+                throw new ApplicationException("This option's value is already exits in option");
+
+            var optionValue = _optionValueRepo.Insert(new OptionValue() { OptionId = option.Id, Value = dto.Value });
+            return Ok(_mapper.Map<AddValueToOptionDto>(optionValue));
+
         }
     }
 }

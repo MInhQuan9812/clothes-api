@@ -14,8 +14,8 @@ namespace clothes.api.Instrafructure.Extensions.AutoMapper
             CreateMap<User, UserDto>();
             CreateMap<Category, CategoryDto>();
             CreateMap<Option, OptionDto>();
-
-
+            CreateMap<OptionValue, AddValueToOptionDto>();
+            CreateMap<OptionValue,OptionValueDto>();
         }
     }
 }
