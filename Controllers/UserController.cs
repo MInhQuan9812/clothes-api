@@ -20,7 +20,7 @@ namespace clothes.api.Controllers
         private readonly IRepository<User> _userRepo;
         private readonly IEfRepository<User, int> _userEfRepo;
 
-        public UserController(IMapper mapper, IJwtExtension jwtExtension,IRepository<User> userRepo, IEfRepository<User,int> userEfRepo, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+        public UserController(IMapper mapper, IJwtExtension jwtExtension, IRepository<User> userRepo, IEfRepository<User, int> userEfRepo, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
         {
             _mapper = mapper;
             _userRepo = userRepo;
@@ -28,14 +28,28 @@ namespace clothes.api.Controllers
             _jwtExtension = jwtExtension;
         }
 
+        [HttpGet("getAllUser")]
+        public IActionResult getAllUser()
+        {
+            var queryClause = _userEfRepo.GetQueryableNoTracking()
+                                         .Where(x => !x.IsDeleted);
+            return Ok(_mapper.Map<ICollection<UserDto>>(queryClause));
+        }
 
+        [HttpGet("getAllUserById")]
+        public IActionResult getAllUserById(int id)
+        {
+            var queryClause = _userEfRepo.GetQueryableNoTracking()                                      
+                                         .Where(x => !x.IsDeleted && x.Id==id);
+            return Ok(_mapper.Map<ICollection<UserDto>>(queryClause));
+        }
         [AllowAnonymous]
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequestDto input)
         {
             var user = _userEfRepo
                 .GetQueryableNoTracking()
-                .FirstOrDefault(x => x.Email.Equals(input.Email))
+                .FirstOrDefault(x => x.UserName.Equals(input.UserName))
                 ?? throw new ApplicationException("User does not exist");
 
             if (!BCrypt.Net.BCrypt.Verify(input.Password, user.Password))
@@ -47,20 +61,33 @@ namespace clothes.api.Controllers
             return Ok(new LoginResponeDto(token, _mapper.Map<UserDto>(user)));
         }
 
+
+
         [HttpPost("signUp")]
         public IActionResult SignUp([FromBody] SignUpDto input)
         {
-            var user = _userRepo.Insert(new User()
+            var userExists = _userEfRepo
+                .GetQueryableNoTracking()
+                .Any(x => x.UserName.Equals(input.UserName));
+
+            if (userExists)
             {
-                UserName=input.UserName,
+                throw new ApplicationException("User already exists");
+            }
+
+            User newUser = new User()
+            {
+                UserName = input.UserName,
                 FullName = input.FullName,
                 Email = input.Email,
                 PhoneNumber = input.PhoneNumber,
                 Password = BCrypt.Net.BCrypt.HashPassword(input.Password),
-                LastUpdate=DateTime.Now,
-            });
+                LastUpdate = DateTime.Now,
+            };
 
-            return Ok(_mapper.Map<UserDto>(user));
+            newUser = _userRepo.Insert(newUser);
+
+            return Ok(_mapper.Map<UserDto>(newUser));
         }
 
         [HttpPut("updateInfo")]
@@ -68,7 +95,7 @@ namespace clothes.api.Controllers
         {
             var user = _userRepo
                .GetQueryable()
-               .FirstOrDefault(x => x.Id== LoggingUserId)
+               .FirstOrDefault(x => x.Id == LoggingUserId)
                     ?? throw new ApplicationException("User does not exist");
 
             user.FullName = value.FullName;
@@ -96,10 +123,16 @@ namespace clothes.api.Controllers
             return Ok(_mapper.Map<UserDto>(user));
         }
 
-        [HttpDelete("{id}")]
-        public void Delete()
+        [HttpDelete("delete/{id}")]
+        public IActionResult Delete(int id)
         {
+            var user = _userEfRepo
+              .GetQueryableNoTracking()
+              .FirstOrDefault(x => x.Id.Equals(id) && !x.IsDeleted)
+               ?? throw new ApplicationException("User is not exist");
 
+            _userRepo.Delete(user);
+            return Ok();
         }
     }
 }

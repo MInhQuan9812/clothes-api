@@ -10,6 +10,7 @@ using System.Text;
 using Newtonsoft.Json;
 using clothes.api.Common.Middlewares;
 using clothes.api.Common.Seedworks;
+using Microsoft.AspNetCore.Hosting;
 
 namespace clothes.api.Common.Extensions
 {
@@ -151,5 +152,20 @@ namespace clothes.api.Common.Extensions
             app.Run();
             return app;
         }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.ConfigureKestrel(serverOptions =>
+                {
+                    // Listen on all network interfaces and use HTTPS
+                    serverOptions.ListenAnyIP(7240, listenOptions =>
+                    {
+                        listenOptions.UseHttps("path/to/your/certificate.pfx", "your_certificate_password");
+                    });
+                });
+                webBuilder.UseStartup<Program>();
+            });
     }
 }

@@ -45,9 +45,10 @@ namespace clothes.api.Controllers
         {
             var option = _optionValueRepo.GetQueryableNoTracking()
                     .Include(x => x.Option)
-                                         .FirstOrDefault(x => !x.IsDeleted && x.OptionId == id)
+                                         .Where(x => !x.IsDeleted && x.OptionId == id)
+                                         .ToList()
                                          ?? throw new ApplicationException("Option doesn not exist");
-            return Ok(_mapper.Map<OptionValueDto>(option));
+            return Ok(_mapper.Map<ICollection<OptionValueDto>>(option));
         }
 
     }
