@@ -30,7 +30,7 @@ namespace clothes.api.Controllers
         public IActionResult GetAllOptionValue()
         {
             var queryClause = _optionValueRepo.GetQueryableNoTracking()
-                                                .Include(x => x.Option)
+                                                //.Include(x => x.Option)
                                                 .Where(x => !x.IsDeleted);
 
             var options = new List<OptionValue>();

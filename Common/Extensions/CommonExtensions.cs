@@ -53,7 +53,7 @@ namespace clothes.api.Common.Extensions
 
             services.AddScoped<DbContext, T>();
             services.AddTransient(typeof(IEfRepository<,>), typeof(EfRepository<,>));
-            //services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
             return services;
         }
         public static IServiceCollection AddDefaultOpenApi(this IServiceCollection services, IConfiguration configuration)

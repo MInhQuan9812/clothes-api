@@ -108,6 +108,7 @@ namespace clothes.api.Controllers
 
             return Ok(_mapper.Map<UserDto>(user));
         }
+
         [AllowAnonymous]
         [HttpPut("resetPassword")]
         public IActionResult ResetPassword([FromBody] ResetPasswordDto value)

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using clothes.api.Instrafructure.Context;
@@ -11,9 +12,11 @@ using clothes.api.Instrafructure.Context;
 namespace clothes.api.Migrations
 {
     [DbContext(typeof(ClothesContext))]
-    partial class ClothesContextModelSnapshot : ModelSnapshot
+    [Migration("20240624045804_InitialCrate4")]
+    partial class InitialCrate4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -169,6 +172,7 @@ namespace clothes.api.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Thumbnail")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Value")
