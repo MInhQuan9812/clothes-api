@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using clothes.api.Dtos.Carts;
 using clothes.api.Dtos.Category;
 using clothes.api.Dtos.Options;
 using clothes.api.Dtos.Product;
@@ -22,6 +23,12 @@ namespace clothes.api.Instrafructure.Extensions.AutoMapper
             CreateMap<OptionValue,CreateOptionValueDto >();
             CreateMap<ProductOptionValue, ProductOptionValueResponeDto>();
             CreateMap<OptionValue, OptionValueDto>();
+            CreateMap<CartItem, CartItemDto>();
+            CreateMap<ProductOptionValue, ProductVarientDto>();
+            CreateMap<Cart, CartDto>();
+            CreateMap<Product, ProductInfoDto>();
+            CreateMap<ProductVariant, ProductSkuDto>();
+            CreateMap<Option, ProductOptionDto>();
 
         }
     }

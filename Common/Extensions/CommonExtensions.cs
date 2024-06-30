@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using clothes.api.Common.Middlewares;
 using clothes.api.Common.Seedworks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace clothes.api.Common.Extensions
 {
@@ -35,7 +36,7 @@ namespace clothes.api.Common.Extensions
                  .AddDefaultAuthentication(configuration)
                  //.AddLogger(configuration)
                  .AddJwtExtension(configuration);
-                 //.AddRedisConfiguration(configuration);
+            //.AddRedisConfiguration(configuration);
             return services;
         }
 
@@ -152,6 +153,19 @@ namespace clothes.api.Common.Extensions
             app.Run();
             return app;
         }
+
+        //public static IServiceCollection AddLogger(this IServiceCollection services, IConfiguration configuration)
+        //{
+        //    var section = configuration.GetSection("Seq");
+        //    if (!section.Exists())
+        //        return services;
+
+        //    services.AddLogging(loggingBuilder =>
+        //    {
+        //        loggingBuilder.AddSeq(section);
+        //    });
+        //    return services;
+        //}
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)

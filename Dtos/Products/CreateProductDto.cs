@@ -11,7 +11,12 @@ namespace clothes.api.Dtos.Products
         public int Price { get; set; }
         public string? Thumbnail { get; set; }
 
+        //Option
+        //public ICollection<CreateOptionDto> Options { get; set; } =new List<CreateOptionDto>();
+        // OptionValue
         public ICollection<CreateOptionValueDto> OptionValues { get; set; } =new List<CreateOptionValueDto>();
+
+        public ICollection<CreateProductVariantDto> ProductVariants { get; set; } = new List<CreateProductVariantDto>();
         //public virtual OrderDetail OrderDetail { get; set; }
     }
 }

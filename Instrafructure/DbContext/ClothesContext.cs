@@ -19,6 +19,9 @@ namespace clothes.api.Instrafructure.Context
         public DbSet<OptionValue> OptionValue { get; set; }
         public DbSet<OrderDetail> OrderDetail { get; set; }
         public DbSet<Wishlist> Wishlist { get; set; }
+        public DbSet<Sku> Sku { get; set; }
+        public DbSet<ProductVariant> ProductVariant { get; set; }
+        public DbSet<VariantOption> VariantOption { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,6 +33,10 @@ namespace clothes.api.Instrafructure.Context
             ConfigureOrderDetaill(modelBuilder);
             ConfigureProductOptionValue(modelBuilder);
             ConfigureWishlist(modelBuilder);
+            ConfigureProductVariant(modelBuilder);
+            ConfigureVariantValue(modelBuilder);
+            ConfigureSku(modelBuilder);
+            ConfigureOption(modelBuilder);
         }
 
         private void ConfigureUserModel(ModelBuilder modelBuilder)
@@ -76,6 +83,21 @@ namespace clothes.api.Instrafructure.Context
                 .HasForeignKey(x => x.CategoryId);
         }
 
+        private void ConfigureOption(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<OptionValue>()
+                .ToTable(nameof(OptionValue))
+                .HasKey(e => e.Id);
+            modelBuilder.Entity<OptionValue>()
+                .HasOne(x => x.Option)
+                .WithMany(x => x.OptionValues)
+                .HasForeignKey(x => x.OptionId);
+
+            modelBuilder.Entity<OptionValue>()
+                .HasOne(x => x.Product)
+                .WithMany(x => x.OptionValues)
+                .HasForeignKey(x => x.ProductId);
+        }
 
         private void ConfigureOrderModel(ModelBuilder modelBuilder)
         {
@@ -118,9 +140,9 @@ namespace clothes.api.Instrafructure.Context
                 .HasForeignKey(x => x.CartId);
 
             modelBuilder.Entity<CartItem>()
-                .HasOne(x => x.Product)
+                .HasOne(x => x.ProductOptionValue)
                 .WithOne(x => x.CartItem)
-                .HasForeignKey<CartItem>(x => x.ProductId);
+                .HasForeignKey<CartItem>(x => x.ProductOptionValueId);
         }
 
         private void ConfigureWishlist(ModelBuilder modelBuilder)
@@ -141,6 +163,63 @@ namespace clothes.api.Instrafructure.Context
 
         }
 
+        public void ConfigureProductVariant(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ProductVariant>()
+                .ToTable(nameof(ProductVariant))
+                .HasKey(x => x.Id);
+
+            modelBuilder.Entity<ProductVariant>()
+                .HasOne(x => x.Product)
+                .WithMany(x => x.ProductVariants)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+
+        }
+        public void ConfigureSku(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Sku>()
+                .ToTable(nameof(Sku))
+                .HasKey(x => x.Id);
+
+            modelBuilder.Entity<Sku>()
+                .HasOne(x => x.ProductVariant)
+                .WithMany(x => x.Skus)
+                .HasForeignKey(x => x.ProductVariantId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+        }
+
+
+        public void ConfigureVariantValue(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<VariantValue>()
+                .ToTable(nameof(VariantValue))
+                .HasKey(x => x.Id);
+
+            modelBuilder.Entity<VariantValue>()
+                .HasOne(x => x.Product)
+                .WithMany(x => x.VariantValues)
+                .HasForeignKey(x => x.ProductId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+
+            modelBuilder.Entity<VariantValue>()
+                .HasOne(x => x.ProductVariant)
+                .WithMany(x => x.VariantValues)
+                .HasForeignKey(x => x.ProductVariantId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+
+            modelBuilder.Entity<VariantValue>()
+                .HasOne(x => x.Option)
+                .WithMany(x => x.VarientValues)
+                .HasForeignKey(x => x.OptionId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+
+            modelBuilder.Entity<VariantValue>()
+                .HasOne(x => x.OptionValue)
+                .WithMany(x => x.VarientValues)
+                .HasForeignKey(x => x.OptionValueId)
+                .OnDelete(DeleteBehavior.ClientNoAction);
+        }
 
 
         public void ConfigureProductOptionValue(ModelBuilder modelBuilder)

@@ -4,7 +4,6 @@ namespace clothes.api.Instrafructure.Entities
 {
     public class Product : Entity<int>
     {
-
         public string Name { get; set; }
         public string Description { get; set; }
         public int CategoryId { get; set; }
@@ -14,8 +13,10 @@ namespace clothes.api.Instrafructure.Entities
 
         //public virtual OrderDetail OrderDetail { get; set; }
         public virtual Category Category { get; set; }
-        public virtual CartItem CartItem { get; set; }
         public virtual Wishlist Wishlist { get; set; }
+        public virtual ICollection<OptionValue> OptionValues { get; set; }=new List<OptionValue>();
         public virtual ICollection<ProductOptionValue> ProductOptionValues { get; set; } = new List<ProductOptionValue>();
+        public virtual ICollection<ProductVariant> ProductVariants { get; set; } =new List<ProductVariant>();
+        public virtual ICollection<VariantValue> VariantValues { get; set; }=new List<VariantValue>();  
     }
 }

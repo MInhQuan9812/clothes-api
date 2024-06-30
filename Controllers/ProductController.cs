@@ -16,18 +16,34 @@ namespace clothes.api.Controllers
     public class ProductController : BaseController
     {
         private readonly IRepository<Product> _productRepo;
+        private readonly IRepository<ProductVariant> _productVariantRepo;
+        private readonly IRepository<VariantValue> _variantValueRepo;
+        private readonly IRepository<Option> _optionRepo;
+        private readonly IRepository<OptionValue> _optionValueRepo;
+
         private readonly DbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
         public ProductController(
             IRepository<Product> productRepo,
+            IRepository<ProductVariant> productVariantRepo,
+            IRepository<VariantValue> variantValueRepo,
+            IRepository<Option> optionRepo,
+            IRepository<OptionValue> optionValueRepo,
+            DbContext dbContext,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor, IUnitOfWork unitOfWork) : base(httpContextAccessor)
         {
             _productRepo = productRepo;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _productRepo = productRepo;
+            _dbContext = dbContext;
+            _productVariantRepo = productVariantRepo;
+            _variantValueRepo = variantValueRepo;
+            _optionRepo = optionRepo;
+            _optionValueRepo= optionValueRepo;
         }
 
         [HttpGet("getProductTopSales")]
@@ -40,8 +56,7 @@ namespace clothes.api.Controllers
         public IActionResult GetProduct(int id)
         {
             var product = _productRepo.GetQueryableNoTracking()
-                                        .Include(x => x.ProductOptionValues)
-                                        .ThenInclude(x => x.OptionValue)
+                                        .Include(x => x.ProductVariants)
                                       .FirstOrDefault(x => x.Id == id && !x.IsDeleted)
                                       ?? throw new ApplicationException("Product doesn not exits");
             return Ok(_mapper.Map<ProductDto>(product));
@@ -51,8 +66,7 @@ namespace clothes.api.Controllers
         public IActionResult GetProduct()
         {
             var product = _productRepo.GetQueryableNoTracking()
-                                     .Include(x => x.ProductOptionValues)
-                                     .ThenInclude(x => x.OptionValue)
+                                     .Include(x => x.ProductVariants)
                                       .Where(x => !x.IsDeleted);
             return Ok(_mapper.Map<ICollection<ProductDto>>(product));
         }
@@ -69,40 +83,73 @@ namespace clothes.api.Controllers
                 CategoryId = dto.CategoryId,
                 Thumbnail = dto.Thumbnail,
             };
+
             using (_unitOfWork.Begin())
             {
                 if (_productRepo.GetQueryableNoTracking().
                     FirstOrDefault(x => x.Id.Equals(product.Id)) != null)
                     throw new ApplicationException("Product is already exist.");
 
-
-                foreach (var optionItem in dto.OptionValues)
-                {
-                    product.ProductOptionValues.Add(CreateProductOptionValue(optionItem, product.Id));
-                }
                 product = _productRepo.Insert(product);
                 _productRepo.SaveChanges();
+
+                foreach (var option in dto.OptionValues)
+                {
+                    _optionValueRepo.Insert(CreateOptionValue(option,product));
+                }
+                _optionValueRepo.SaveChanges();
+
+                foreach(var variant in dto.ProductVariants)
+                {
+                    _productVariantRepo.Insert(CreateProductVariant(variant,product));
+                }
+                _productVariantRepo.SaveChanges();
+
                 _unitOfWork.Complete();
             }
             return Ok(_mapper.Map<ProductDto>(product));
         }
 
-        private ProductOptionValue CreateProductOptionValue(CreateOptionValueDto optionItem, int id)
+        private OptionValue CreateOptionValue(CreateOptionValueDto option, Product product)
         {
             var optionValue = new OptionValue()
             {
-                OptionId = optionItem.OptionId,
-                Value = optionItem.Value,
-                Price = optionItem.Price,
-                Thumbnail=optionItem.Thumbnail,
+                ProductId=product.Id,
+                OptionId = option.OptionId,
+                Value = option.Value
             };
-            var productOptionValue = new ProductOptionValue()
+            return optionValue;
+        }
+
+        private ProductVariant CreateProductVariant(CreateProductVariantDto variant,Product product)
+        {
+            var productVariant = new ProductVariant()
             {
-                OptionId = optionItem.OptionId,
-                OptionValue = optionValue,
-                ProductId = id,
+                VariantName = variant.VariantName,
+                ProductId = product.Id,
+                Price=0,
+                Quantity = 0
             };
-            return productOptionValue;
+
+            foreach (var varientValue in variant.VarientValues)
+            {
+                var option =_optionRepo.GetQueryableNoTracking()
+                    .FirstOrDefault(x => x.Name.Equals(varientValue.Option))
+                        ?? throw new ApplicationException("Option is invalid");
+
+                var optValue = _optionValueRepo.GetQueryableNoTracking()
+                    .FirstOrDefault(x => x.Value.Equals(varientValue.Value)&&x.OptionId==option.Id && x.ProductId==product.Id)
+                        ?? throw new ApplicationException("Option Value is invalid");
+
+                productVariant.VariantValues.Add(new VariantValue()
+                {
+                    ProductId = product.Id,
+                    ProductVariantId=productVariant.Id,
+                    OptionId = option.Id,
+                    OptionValueId = optValue.Id
+                });
+            }
+            return productVariant;
         }
     }
 }
