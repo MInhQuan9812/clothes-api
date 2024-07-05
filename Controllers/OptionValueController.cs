@@ -41,13 +41,13 @@ namespace clothes.api.Controllers
         }
 
         [HttpGet("getOptionValueById")]
-        public IActionResult GetOptionValueById(int id)
+        public IActionResult GetOptionValueByProductId(int id)
         {
             var option = _optionValueRepo.GetQueryableNoTracking()
-                    .Include(x => x.Option)
-                                         .Where(x => !x.IsDeleted && x.OptionId == id)
+                    .Include(x => x.Product)
+                                         .Where(x => !x.IsDeleted && x.ProductId == id)
                                          .ToList()
-                                         ?? throw new ApplicationException("Option doesn not exist");
+                                         ?? throw new ApplicationException("OptionValue doesn not exist");
             return Ok(_mapper.Map<ICollection<OptionValueDto>>(option));
         }
 
