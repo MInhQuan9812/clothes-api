@@ -70,7 +70,7 @@ namespace clothes.api.Migrations
                     b.Property<DateTime>("LastUpdate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int>("ProductOptionValueId")
+                    b.Property<int>("ProductVariantId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Quantity")
@@ -80,7 +80,7 @@ namespace clothes.api.Migrations
 
                     b.HasIndex("CartId");
 
-                    b.HasIndex("ProductOptionValueId")
+                    b.HasIndex("ProductVariantId")
                         .IsUnique();
 
                     b.ToTable("CartItem", (string)null);
@@ -165,6 +165,9 @@ namespace clothes.api.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Thumbnail")
+                        .HasColumnType("text");
+
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("text");
@@ -212,8 +215,8 @@ namespace clothes.api.Migrations
                         .IsRequired()
                         .HasColumnType("integer");
 
-                    b.Property<long?>("Total")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("Total")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -247,6 +250,9 @@ namespace clothes.api.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductVariantId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Quantity")
@@ -348,6 +354,9 @@ namespace clothes.api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CartItemId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("timestamp without time zone");
 
@@ -367,6 +376,8 @@ namespace clothes.api.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CartItemId");
 
                     b.HasIndex("OptionId");
 
@@ -435,12 +446,43 @@ namespace clothes.api.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("Percentdiscount")
+                    b.Property<int>("PromotionTypeId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PromotionValue")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PromotionTypeId");
+
                     b.ToTable("Promotion");
+                });
+
+            modelBuilder.Entity("clothes.api.Instrafructure.Entities.PromotionType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PromotionType");
                 });
 
             modelBuilder.Entity("clothes.api.Instrafructure.Entities.Sku", b =>
@@ -640,15 +682,15 @@ namespace clothes.api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("clothes.api.Instrafructure.Entities.ProductOptionValue", "ProductOptionValue")
+                    b.HasOne("clothes.api.Instrafructure.Entities.ProductVariant", "ProductVariant")
                         .WithOne("CartItem")
-                        .HasForeignKey("clothes.api.Instrafructure.Entities.CartItem", "ProductOptionValueId")
+                        .HasForeignKey("clothes.api.Instrafructure.Entities.CartItem", "ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cart");
 
-                    b.Navigation("ProductOptionValue");
+                    b.Navigation("ProductVariant");
                 });
 
             modelBuilder.Entity("clothes.api.Instrafructure.Entities.OptionValue", b =>
@@ -705,7 +747,7 @@ namespace clothes.api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("clothes.api.Instrafructure.Entities.Product", "Product")
+                    b.HasOne("clothes.api.Instrafructure.Entities.ProductVariant", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -729,6 +771,12 @@ namespace clothes.api.Migrations
 
             modelBuilder.Entity("clothes.api.Instrafructure.Entities.ProductOptionValue", b =>
                 {
+                    b.HasOne("clothes.api.Instrafructure.Entities.CartItem", "CartItem")
+                        .WithMany()
+                        .HasForeignKey("CartItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("clothes.api.Instrafructure.Entities.Option", "Option")
                         .WithMany("ProductOptionValues")
                         .HasForeignKey("OptionId")
@@ -747,6 +795,8 @@ namespace clothes.api.Migrations
                         .OnDelete(DeleteBehavior.ClientNoAction)
                         .IsRequired();
 
+                    b.Navigation("CartItem");
+
                     b.Navigation("Option");
 
                     b.Navigation("OptionValue");
@@ -763,6 +813,17 @@ namespace clothes.api.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("clothes.api.Instrafructure.Entities.Promotion", b =>
+                {
+                    b.HasOne("clothes.api.Instrafructure.Entities.PromotionType", "PromotionType")
+                        .WithMany("Promotions")
+                        .HasForeignKey("PromotionTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PromotionType");
                 });
 
             modelBuilder.Entity("clothes.api.Instrafructure.Entities.Sku", b =>
@@ -880,14 +941,11 @@ namespace clothes.api.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("clothes.api.Instrafructure.Entities.ProductOptionValue", b =>
+            modelBuilder.Entity("clothes.api.Instrafructure.Entities.ProductVariant", b =>
                 {
                     b.Navigation("CartItem")
                         .IsRequired();
-                });
 
-            modelBuilder.Entity("clothes.api.Instrafructure.Entities.ProductVariant", b =>
-                {
                     b.Navigation("Skus");
 
                     b.Navigation("VariantValues");
@@ -896,6 +954,11 @@ namespace clothes.api.Migrations
             modelBuilder.Entity("clothes.api.Instrafructure.Entities.Promotion", b =>
                 {
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("clothes.api.Instrafructure.Entities.PromotionType", b =>
+                {
+                    b.Navigation("Promotions");
                 });
 
             modelBuilder.Entity("clothes.api.Instrafructure.Entities.User", b =>

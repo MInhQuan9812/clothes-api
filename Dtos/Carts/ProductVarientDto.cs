@@ -6,11 +6,9 @@ namespace clothes.api.Dtos.Carts
     {
         public int Id { get; set; }
         public int ProductId { get; set; }
-        public int OptionId { get; set; }
-        public int OptionValueId { get; set; }
-        public OptionValueDto OptionValue { get; set; }
-
-        public ProductInfoDto ProductInfoDto { get; set; }
+        public string VariantName { get; set; }
+        public int Price {  get; set; }
+        public ICollection<VariantValueDto> VariantValues { get; set; }
 
     }
 }

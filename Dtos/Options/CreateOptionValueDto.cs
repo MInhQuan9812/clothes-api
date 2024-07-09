@@ -4,6 +4,7 @@
     {
         public int OptionId { get; set; }
         public string Value { get; set; }
+        public string? Thumbnail { get; set; }
 
     }
 }

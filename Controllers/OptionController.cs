@@ -41,6 +41,21 @@ namespace clothes.api.Controllers
             return Ok(_mapper.Map<ICollection<OptionDto>>(options));
         }
 
+        //[HttpGet]
+        //public IActionResult GetOptionToOptionValueToFindVariantByOptionId(int id)
+        //{
+        //    var queryClause = _optionRepo.GetQueryableNoTracking()
+        //                                    .Include(x=>x.OptionValues)
+        //                                    .ThenInclude(x=>x.VarientValues)
+        //                                 .Where(x => !x.IsDeleted);
+        //    var options = new List<Option>();
+
+        //    options = queryClause.ToList();
+
+        //    return Ok(_mapper.Map<ICollection<OptionDto>>(options));
+        //}
+
+
 
 
         [HttpPost("createOption")]

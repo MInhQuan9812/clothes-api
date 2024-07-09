@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using clothes.api.Instrafructure.DesignPattern.Promotion;
+using System.ComponentModel.DataAnnotations;
 
 namespace clothes.api.Instrafructure.Entities
 {
-    public class Order : Entity<int>
+    public class Order : Entity<int>, IOrder
     {
 
         public int CustomerId { get; set; }
@@ -10,7 +11,7 @@ namespace clothes.api.Instrafructure.Entities
         public string Address { get; set; }
         public int PaymentId { get; set; }
 
-        public long? Total { get; set; }
+        public int? Total { get; set; }
         public int? PromotionId { get; set; } = 0;
 
 
@@ -20,7 +21,7 @@ namespace clothes.api.Instrafructure.Entities
 
         public virtual Payment Payment { get; set; }
 
-        public long? GetTotalPrice => Total;
+        public int? GetTotalPrice => Total;
 
     }
 }

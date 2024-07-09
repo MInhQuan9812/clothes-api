@@ -22,6 +22,7 @@ namespace clothes.api.Instrafructure.Context
         public DbSet<Sku> Sku { get; set; }
         public DbSet<ProductVariant> ProductVariant { get; set; }
         public DbSet<VariantOption> VariantOption { get; set; }
+        public DbSet<PromotionType> PromotionType { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -50,6 +51,7 @@ namespace clothes.api.Instrafructure.Context
                 .WithOne(x => x.Customer)
                 .HasForeignKey<Cart>(x => x.CustomerId);
         }
+
         private void ConfigureOrderDetaill(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<OrderDetail>()
@@ -81,6 +83,19 @@ namespace clothes.api.Instrafructure.Context
                 .HasOne(x => x.Category)
                 .WithMany(x => x.Product)
                 .HasForeignKey(x => x.CategoryId);
+        }
+
+        private void ConfigurePromotion(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Promotion>()
+                .ToTable(nameof(Promotion))
+                .HasKey(e => e.Id);
+
+
+            modelBuilder.Entity<Promotion>()
+                .HasOne(x => x.PromotionType)
+                .WithMany(x => x.Promotions)
+                .HasForeignKey(x => x.PromotionTypeId);
         }
 
         private void ConfigureOption(ModelBuilder modelBuilder)
@@ -140,9 +155,9 @@ namespace clothes.api.Instrafructure.Context
                 .HasForeignKey(x => x.CartId);
 
             modelBuilder.Entity<CartItem>()
-                .HasOne(x => x.ProductOptionValue)
+                .HasOne(x => x.ProductVariant)
                 .WithOne(x => x.CartItem)
-                .HasForeignKey<CartItem>(x => x.ProductOptionValueId);
+                .HasForeignKey<CartItem>(x => x.ProductVariantId);
         }
 
         private void ConfigureWishlist(ModelBuilder modelBuilder)

@@ -4,6 +4,7 @@ namespace clothes.api.Dtos.Carts
 {
     public class CartDto
     {
+        public int Id { get; set; }
         public int? CustomerId { get; set; }
 
         public DateTime? CreateAt { get; set; } = DateTime.Now;

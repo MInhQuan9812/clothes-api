@@ -40,7 +40,7 @@ namespace clothes.api.Controllers
             return Ok(_mapper.Map<ICollection<OptionValueDto>>(options));
         }
 
-        [HttpGet("getOptionValueById")]
+        [HttpGet("GetOptionValueByProductId")]
         public IActionResult GetOptionValueByProductId(int id)
         {
             var option = _optionValueRepo.GetQueryableNoTracking()

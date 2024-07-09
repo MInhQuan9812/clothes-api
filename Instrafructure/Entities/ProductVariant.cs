@@ -7,6 +7,7 @@
         public int Price { get; set; }
         public int Quantity { get; set; }
 
+        public virtual CartItem CartItem { get; set; }
         public virtual Product Product { get; set; }
         public ICollection<Sku> Skus { get; set; }  =new List<Sku>();
         public ICollection<VariantValue> VariantValues { get; set; }=new List<VariantValue>();

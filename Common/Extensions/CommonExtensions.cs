@@ -12,6 +12,7 @@ using clothes.api.Common.Middlewares;
 using clothes.api.Common.Seedworks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using clothes.api.Instrafructure.Services.Paypal;
 
 namespace clothes.api.Common.Extensions
 {
@@ -55,6 +56,8 @@ namespace clothes.api.Common.Extensions
             services.AddScoped<DbContext, T>();
             services.AddTransient(typeof(IEfRepository<,>), typeof(EfRepository<,>));
             services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IPaypalStrategy, PaypalPaymentStrategy>();
+            services.AddTransient<IPaypallService, PaypalService>();
             return services;
         }
         public static IServiceCollection AddDefaultOpenApi(this IServiceCollection services, IConfiguration configuration)

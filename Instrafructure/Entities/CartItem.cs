@@ -7,17 +7,17 @@ namespace clothes.api.Instrafructure.Entities
     {
         public int CartId { get; set; }
 
-        public int ProductOptionValueId { get; set; }
+        public int ProductVariantId { get; set; }
 
         public int Quantity { get; set; } = 0;
 
-        public ProductOptionValue ProductOptionValue { get; set; }
+        public ProductVariant ProductVariant { get; set; }
 
         public virtual Cart Cart { get; set; }
 
-        public CartItem(int productOptionValueId,int quantity) 
+        public CartItem(int productVariantId,int quantity) 
         {
-            ProductOptionValueId= productOptionValueId;
+            ProductVariantId= productVariantId;
             Quantity= quantity;
         }
     }

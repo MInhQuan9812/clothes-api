@@ -66,7 +66,7 @@ namespace clothes.api.Controllers
         [HttpPost("signUp")]
         public IActionResult SignUp([FromBody] SignUpDto input)
         {
-            var userExists = _userEfRepo
+            var userExists = _userRepo
                 .GetQueryableNoTracking()
                 .Any(x => x.UserName.Equals(input.UserName));
 
@@ -91,11 +91,11 @@ namespace clothes.api.Controllers
         }
 
         [HttpPut("updateInfo")]
-        public IActionResult UpdateInfo([FromBody] UpdateInfoDto value)
+        public IActionResult UpdateInfo(int id,[FromBody] UpdateInfoDto value)
         {
             var user = _userRepo
                .GetQueryable()
-               .FirstOrDefault(x => x.Id == LoggingUserId)
+               .FirstOrDefault(x => x.Id == id)
                     ?? throw new ApplicationException("User does not exist");
 
             user.FullName = value.FullName;
@@ -104,6 +104,8 @@ namespace clothes.api.Controllers
             user.Gender = value.Gender;
             user.LastUpdate = DateTime.Now;
             user.Avatar = !string.IsNullOrEmpty(value.Avatar) ? value.Avatar : null;
+
+            _userRepo.Update(id,user);
             _userRepo.SaveChanges();
 
             return Ok(_mapper.Map<UserDto>(user));
@@ -113,12 +115,14 @@ namespace clothes.api.Controllers
         [HttpPut("resetPassword")]
         public IActionResult ResetPassword([FromBody] ResetPasswordDto value)
         {
-            var user = _userRepo
-               .GetQueryable()
-               .FirstOrDefault(x => x.Id == 1)
-                    ?? throw new ApplicationException("User does not exist");
+            var user = _userRepo.GetQueryable().FirstOrDefault(x => x.Id == value.Id) ?? throw new ApplicationException("User doesn not exits");
 
-            user.Password = BCrypt.Net.BCrypt.HashPassword(value.Password);
+            if (!BCrypt.Net.BCrypt.Verify(value.OldPassword, user.Password))
+                throw new ApplicationException("Old Password is incorrect");
+            
+            user.Password = BCrypt.Net.BCrypt.HashPassword(value.NewPassword);
+
+            _userRepo.Update(value.Id, user);
             _userRepo.SaveChanges();
 
             return Ok(_mapper.Map<UserDto>(user));

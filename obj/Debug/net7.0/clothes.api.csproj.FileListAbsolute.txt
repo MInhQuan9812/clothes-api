@@ -63,3 +63,4 @@ C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\Microsof
 C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\Microsoft.Extensions.Logging.Abstractions.dll
 C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\Microsoft.Extensions.Options.dll
 C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\Microsoft.Extensions.Primitives.dll
+C:\Users\MinhQuan\source\repos\clothes.api\clothes.api\bin\Debug\net7.0\PayPal.dll

@@ -12,10 +12,10 @@ namespace clothes.api.Instrafructure.Entities
         public int Quantity { get; set; }
         public int UnitPrice { get; set; }
         public int TotalPrice { get; set; }
-
+        public int ProductVariantId { get; set; }
 
         public virtual Order Order { get; set; }
-        public Product Product { get; set; }
+        public ProductVariant Product { get; set; }
 
     }
 }

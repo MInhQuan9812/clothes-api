@@ -5,6 +5,7 @@
         public int OptionId { get; set; }
         public int ProductId { get; set; }
         public string Value { get; set; }
+        public string? Thumbnail { get; set; }
 
         public virtual Product Product { get; set; }
         public virtual Option Option { get; set; }

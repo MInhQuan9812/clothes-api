@@ -52,11 +52,12 @@ namespace clothes.api.Controllers
             return Ok();
         }
 
-        [HttpGet("getProductById/{id}")]
+        [HttpGet("getProductByProductId/{id}")]
         public IActionResult GetProduct(int id)
         {
             var product = _productRepo.GetQueryableNoTracking()
                                         .Include(x => x.ProductVariants)
+                                        .ThenInclude(x => x.VariantValues)
                                       .FirstOrDefault(x => x.Id == id && !x.IsDeleted)
                                       ?? throw new ApplicationException("Product doesn not exits");
             return Ok(_mapper.Map<ProductDto>(product));
@@ -67,6 +68,7 @@ namespace clothes.api.Controllers
         {
             var product = _productRepo.GetQueryableNoTracking()
                                      .Include(x => x.ProductVariants)
+                                     .ThenInclude(x=>x.VariantValues)
                                       .Where(x => !x.IsDeleted);
             return Ok(_mapper.Map<ICollection<ProductDto>>(product));
         }
@@ -116,7 +118,8 @@ namespace clothes.api.Controllers
             {
                 ProductId=product.Id,
                 OptionId = option.OptionId,
-                Value = option.Value
+                Value = option.Value,
+                Thumbnail=option.Thumbnail
             };
             return optionValue;
         }
