@@ -56,7 +56,8 @@ namespace clothes.api.Common.Extensions
             services.AddScoped<DbContext, T>();
             services.AddTransient(typeof(IEfRepository<,>), typeof(EfRepository<,>));
             services.AddTransient<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<IPaypalStrategy, PaypalPaymentStrategy>();
+            services.AddTransient<IPaymentStrategy, PaypalPaymentStrategy>();
+            services.AddTransient<IPaymentStrategy, DirectPaymentStrategy>();
             services.AddTransient<IPaypallService, PaypalService>();
             return services;
         }

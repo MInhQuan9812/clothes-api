@@ -2,10 +2,10 @@
 
 namespace clothes.api.Instrafructure.Services.Paypal
 {
-    public interface IPaypalStrategy
+    public interface IPaymentStrategy
     {
         Task<bool> Paymention(int amount, CheckOutDto dto);
 
-        Task<string> GetApprovalUrl();
+        string GetApprovalUrl();
     }
 }

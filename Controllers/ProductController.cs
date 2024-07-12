@@ -58,6 +58,7 @@ namespace clothes.api.Controllers
             var product = _productRepo.GetQueryableNoTracking()
                                         .Include(x => x.ProductVariants)
                                         .ThenInclude(x => x.VariantValues)
+                                        .ThenInclude(x=>x.OptionValue)
                                       .FirstOrDefault(x => x.Id == id && !x.IsDeleted)
                                       ?? throw new ApplicationException("Product doesn not exits");
             return Ok(_mapper.Map<ProductDto>(product));
@@ -130,8 +131,8 @@ namespace clothes.api.Controllers
             {
                 VariantName = variant.VariantName,
                 ProductId = product.Id,
-                Price=0,
-                Quantity = 0
+                Price=variant.Price,
+                Quantity = variant.Quantity
             };
 
             foreach (var varientValue in variant.VarientValues)

@@ -1,6 +1,10 @@
 ﻿using AutoMapper;
+using clothes.api.Common;
 using clothes.api.Common.Seedworks;
 using clothes.api.Dtos.Carts;
+using clothes.api.Dtos.User;
+using clothes.api.Instrafructure.Contant;
+using clothes.api.Instrafructure.Context;
 using clothes.api.Instrafructure.DesignPattern.Promotion;
 using clothes.api.Instrafructure.Entities;
 using clothes.api.Instrafructure.Services.Paypal;
@@ -11,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.JSInterop.Infrastructure;
 using Newtonsoft.Json.Linq;
+using System.Reflection.Metadata;
 
 namespace clothes.api.Controllers
 {
@@ -28,18 +33,25 @@ namespace clothes.api.Controllers
         private readonly IRepository<ProductOptionValue> _productOptionValueRepo;
         private readonly IRepository<ProductVariant> _productVariantRepo;
         private readonly IRepository<VariantValue> _variantValueRepo;
-        private readonly IPaypalStrategy _paypalStrategy;
+        private readonly IRepository<Payment> _paymentRepo;
+        private readonly ClothesContext _context;
+        private readonly IPaymentStrategy _paypalStrategy;
+        private readonly IConfiguration _configuration;
+        private readonly Working _working;
 
         public CartController(
             IMapper mapper,
             IUnitOfWork unitOfWork,
             IRepository<Cart> cartRepo,
             IRepository<User> userRepo,
+            ClothesContext context,
             IRepository<OptionValue> optionValueRepo,
             IRepository<VariantValue> variantValueRepo,
             IRepository<Order> orderRepo,
+            IRepository<Payment> paymentRepo,
             IRepository<Promotion> promotionRepo,
-            IPaypalStrategy paypalStrategy,
+            IPaymentStrategy paypalStrategy,
+            IConfiguration configuration,
             IRepository<ProductVariant> productVariantRepo,
             IHttpContextAccessor httpContextAccessor
             ) : base(httpContextAccessor)
@@ -49,11 +61,16 @@ namespace clothes.api.Controllers
             _optionValueRepo = optionValueRepo;
             _variantValueRepo = variantValueRepo;
             _userRepo = userRepo;
-            _orderRepo= orderRepo;
+            _context = context;
+            _orderRepo = orderRepo;
+            _configuration = configuration;
+            _paymentRepo = paymentRepo;
             _promotionRepo = promotionRepo;
             _paypalStrategy = paypalStrategy;
             _productVariantRepo = productVariantRepo;
             _unitOfWork = unitOfWork;
+            _working = new Working(_context, _configuration, _cartRepo, _promotionRepo, _orderRepo);
+
         }
 
         [HttpGet("GetCartByUserId/{id}")]
@@ -139,7 +156,7 @@ namespace clothes.api.Controllers
                 .FirstOrDefault(x => x.Id == id && !x.IsDeleted)
                ?? throw new ApplicationException("Cart does not exist");
 
-            if (value.ProductVariantId==null)
+            if (value.ProductVariantId == null)
                 throw new ApplicationException("ProductVarientId must not empty");
 
             if (value.Quantity <= 0)
@@ -158,12 +175,14 @@ namespace clothes.api.Controllers
                 ? cartItem.Quantity += value.Quantity
                 : cartItem.Quantity = value.Quantity;
 
-            
+
             _cartRepo.Update(id, cart);
             _cartRepo.SaveChanges();
 
             return Ok(_mapper.Map<CartItemDto>(cartItem));
         }
+
+
 
         [HttpDelete("{id}/lineItems/{lineItemId}")]
         public IActionResult DeleteLineItem(int id, int lineItemId, [FromBody] AddLineItemDto value)
@@ -197,65 +216,48 @@ namespace clothes.api.Controllers
         [HttpPost("{cartId}/CheckOut")]
         public IActionResult CheckOut(int cartId, int userId, [FromBody] CheckOutDto value)
         {
-            var cart = _cartRepo
-               .GetQueryable()
-               .Include(x => x.CartItems)
-               .ThenInclude(cartItem => cartItem.ProductVariant)
-               .FirstOrDefault(x => x.Id == cartId && x.CustomerId == userId && !x.IsDeleted)
-                    ?? throw new ApplicationException("Cart does not exist");
-
-           
-            //var customer = _userRepo
-            //    .GetQueryableNoTracking()
-            //    .FirstOrDefault(x => x.Id == Id)
-            //        ?? throw new AppException("User does not exist");
-
-            //var deliveryAddress = _deliveryAddressRepo
-            //    .GetQueryableNoTracking()
-            //    .FirstOrDefault(x => x.Id == value.DeliveryAddressId)
-            //        ?? throw new AppException("Delivery address does not exist");
-
-            var order = new Order
+            IPaymentStrategy paymentStrategy;
+            var payment = _paymentRepo.GetQueryableNoTracking().FirstOrDefault(x => x.Id == value.PaymentId) ?? throw new ApplicationException("Payment is not exits");
+            if (payment.Title == Contants.PaypalMethod)
             {
-                CustomerId = userId,
-                Address = value.Address,
-                Total = value.Total,
-                PaymentId = value.PaymentId,
-                PromotionId=value.PromotionId              
-            };
-
-            IOrder discountedOrder;
-            var discountValue = _promotionRepo.GetQueryableNoTracking().Where(x => x.Id == value.PromotionId).FirstOrDefault();
-            if (discountValue.PromotionValue < 100)
-            {
-                discountedOrder = new PercentageDiscountDecorator(order, discountValue.PromotionValue);
+                try
+                {
+                    paymentStrategy = new PaypalPaymentStrategy(_context, _configuration, _cartRepo);
+                    var paymentContext = new PaymentContext(paymentStrategy);
+                    paymentContext.ProcessOrderPayment(userId, value);
+                    var url = paymentStrategy.GetApprovalUrl();
+                    var order = _working.cartWorking.CheckOut(_unitOfWork,url,cartId, userId, value);
+                    return Ok(new OrderResponeDto(url, _mapper.Map<OrderDto>(order)));
+                }
+                catch (Exception ex)
+                {
+                    throw new ApplicationException("Error Paypal Payment");
+                }
             }
             else
             {
-                discountedOrder = new FixedDiscountDecorator(order, discountValue.PromotionValue);
-            }
-            order.Total = discountedOrder.GetTotalPrice;
-
-            using (_unitOfWork.Begin())
-            {
-                foreach (var lineItem in cart.CartItems)
+                try
                 {
-                    var orderDetail = new OrderDetail()
-                    {
-                        OrderId = order.Id,
-                        ProductVariantId = lineItem.ProductVariantId,
-                        Quantity = lineItem.Quantity,
-                        ProductId = lineItem.ProductVariant.ProductId,
-                        TotalPrice = (int)(lineItem.ProductVariant.Price * lineItem.Quantity),
-                    };
-                    order.OrderDetails.Add(orderDetail);
+                    paymentStrategy = new DirectPaymentStrategy(_context, _configuration,_cartRepo);
+                    var paymentContext = new PaymentContext(paymentStrategy);
+                    paymentContext.ProcessOrderPayment(userId, value);
+                    return Ok();
                 }
-                _cartRepo.SaveChanges();
-                _orderRepo.Insert(order);
-                _unitOfWork.Complete();
+                catch (Exception ex)
+                {
+                    throw new Exception("Error Cash Payment");
+                }
             }
-            return Ok(order);
         }
-
     }
 }
+
+//var customer = _userRepo
+//    .GetQueryableNoTracking()
+//    .FirstOrDefault(x => x.Id == Id)
+//        ?? throw new AppException("User does not exist");
+
+//var deliveryAddress = _deliveryAddressRepo
+//    .GetQueryableNoTracking()
+//    .FirstOrDefault(x => x.Id == value.DeliveryAddressId)
+//        ?? throw new AppException("Delivery address does not exist");

@@ -11,5 +11,9 @@
         public const string Role = "Customer";
         public const int Male = 1;
         public const int Female = 0;
+        public const int ProportionDiscount = 100;
+        public const string BankMethod = "Banking";
+        public const string CashMethod = "Cash";
+        public const string PaypalMethod = "Paypal";
     }
 }

@@ -38,7 +38,8 @@ namespace clothes.api.Instrafructure.Extensions.AutoMapper
             CreateMap<Payment, PaymentDto>();
             CreateMap<Promotion, PromotionDto>();
             CreateMap<PromotionType, PromotionTypeDto>();
-            
+            CreateMap<Order, OrderDto>();
+
         }
     }
 }

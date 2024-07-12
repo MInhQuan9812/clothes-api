@@ -1,14 +1,16 @@
 ﻿using clothes.api.Dtos.Carts;
 using clothes.api.Instrafructure.Context;
+using clothes.api.Instrafructure.DesignPattern.Facade;
 using clothes.api.Instrafructure.Entities;
 using clothes.api.Repositories;
 
 namespace clothes.api.Instrafructure.Services.Paypal
 {
-    public class PaypalPaymentStrategy : IPaypalStrategy
+    public class PaypalPaymentStrategy : IPaymentStrategy
     {
+        private Working _working;
+
         private readonly IConfiguration _configuration;
-        private PaypalService _paypalService;
         public string ApprovalUrl { get; set; }
         private readonly IRepository<Cart> _cartRepo;
 
@@ -22,6 +24,7 @@ namespace clothes.api.Instrafructure.Services.Paypal
         {
             try
             {
+                var cart=_cartRepo.GetQueryableNoTracking().FirstOrDefault(x => x.CustomerId == userId) ?? throw new ApplicationException("Cart doesn not exits");
                 int amount = dto.Total;
                 ApprovalUrl =await PayUsingPaypal(amount);
                 return true;
@@ -31,7 +34,7 @@ namespace clothes.api.Instrafructure.Services.Paypal
             }
         }
 
-        public async Task<string> GetApprovalUrl()
+        public string GetApprovalUrl()
         {
             return ApprovalUrl;
         }
@@ -40,25 +43,22 @@ namespace clothes.api.Instrafructure.Services.Paypal
         {
             try
             {
-                string approvalUrl =await PaymentWithPaypal(amount);
-            }catch(Exception ex)
-            {
-                throw new ApplicationException($"{ex.Message}");
+                string approvalUrl = await ServiceFacade.Instance(_configuration).PaymentWithPaypall(amount);
+                if (!string.IsNullOrEmpty(approvalUrl))
+                {
+                    return approvalUrl;
+                }
+                else
+                {
+                    throw new Exception("Error to initial Payment");
+                }
             }
-            return null;
+            catch (Exception ex)
+            {
+                throw new Exception($"{ex.Message}");
+            }
         }
 
-        private async Task<string> PaymentWithPaypal(int amount)
-        {
-            int _amount = amount / 25000;
-            string returnUrl = "https://localhost:7217/Payment/Success";
-            string cancelUrl = "https://localhost:7217/Cart/";
-
-            var createdPayment = await _paypalService.CreateOrderAsync(_amount, returnUrl, cancelUrl);
-
-            string approvalUrl = createdPayment.links.FirstOrDefault(x => x.rel.ToLower() == "approval_url")?.href;
-
-            return await Task.FromResult(approvalUrl);
-        }
+       
     }
 }
