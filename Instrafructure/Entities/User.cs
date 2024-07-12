@@ -26,7 +26,7 @@ namespace clothes.api.Instrafructure.Entities
 
 
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
-        public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+        public virtual Wishlist? Wishlist { get; set; }
 
         public virtual Cart? Cart { get; set; }
     }

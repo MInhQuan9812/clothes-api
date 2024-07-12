@@ -7,6 +7,7 @@ using clothes.api.Dtos.Product;
 using clothes.api.Dtos.Products;
 using clothes.api.Dtos.Promotions;
 using clothes.api.Dtos.User;
+using clothes.api.Dtos.Wishlist;
 using clothes.api.Instrafructure.Entities;
 
 namespace clothes.api.Instrafructure.Extensions.AutoMapper
@@ -39,6 +40,9 @@ namespace clothes.api.Instrafructure.Extensions.AutoMapper
             CreateMap<Promotion, PromotionDto>();
             CreateMap<PromotionType, PromotionTypeDto>();
             CreateMap<Order, OrderDto>();
+            CreateMap<Wishlist, WishlistDto>();
+            CreateMap<Wishlist, AddToWishListDto>();
+            CreateMap<WishlistItem, WishlistItemDto>();
 
         }
     }

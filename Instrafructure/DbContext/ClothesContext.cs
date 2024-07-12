@@ -23,6 +23,7 @@ namespace clothes.api.Instrafructure.Context
         public DbSet<ProductVariant> ProductVariant { get; set; }
         public DbSet<VariantOption> VariantOption { get; set; }
         public DbSet<PromotionType> PromotionType { get; set; }
+        public DbSet<WishlistItem> WishlistItem { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,7 +34,7 @@ namespace clothes.api.Instrafructure.Context
             ConfigureOrderModel(modelBuilder);
             ConfigureOrderDetaill(modelBuilder);
             ConfigureProductOptionValue(modelBuilder);
-            ConfigureWishlist(modelBuilder);
+            ConfigureWishlistItem(modelBuilder);
             ConfigureProductVariant(modelBuilder);
             ConfigureVariantValue(modelBuilder);
             ConfigureSku(modelBuilder);
@@ -50,6 +51,11 @@ namespace clothes.api.Instrafructure.Context
                 .HasOne(x => x.Cart)
                 .WithOne(x => x.Customer)
                 .HasForeignKey<Cart>(x => x.CustomerId);
+
+            modelBuilder.Entity<User>()
+                .HasOne(x => x.Wishlist)
+                .WithOne(x => x.User)
+                .HasForeignKey<Wishlist>(x => x.UserId);
         }
 
         private void ConfigureOrderDetaill(ModelBuilder modelBuilder)
@@ -143,6 +149,13 @@ namespace clothes.api.Instrafructure.Context
                 .HasKey(e => e.Id);
         }
 
+        private void ConfigureWishlist(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Wishlist>()
+                .ToTable(nameof(Wishlist))
+                .HasKey(e => e.Id);
+        }
+
         private void ConfigureCartItem(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CartItem>()
@@ -160,21 +173,21 @@ namespace clothes.api.Instrafructure.Context
                 .HasForeignKey<CartItem>(x => x.ProductVariantId);
         }
 
-        private void ConfigureWishlist(ModelBuilder modelBuilder)
+        private void ConfigureWishlistItem(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Wishlist>()
-                .ToTable(nameof(Wishlist))
+            modelBuilder.Entity<WishlistItem>()
+                .ToTable(nameof(WishlistItem))
                 .HasKey(e => e.Id);
 
-            modelBuilder.Entity<Wishlist>()
-                .HasOne(x => x.Product)
-                .WithOne(x => x.Wishlist)
-                .HasForeignKey<Wishlist>(x => x.ProductId);
+            modelBuilder.Entity<WishlistItem>()
+                .HasOne(x => x.Wishlist)
+                .WithMany(x => x.WishlistItems)
+                .HasForeignKey(x => x.WishlistId);
 
-            modelBuilder.Entity<Wishlist>()
-                .HasOne(x => x.User)
-                .WithMany(x => x.Wishlists)
-                .HasForeignKey(x => x.UserId);
+            modelBuilder.Entity<WishlistItem>()
+                .HasOne(x => x.Product)
+                .WithOne(x => x.WishlistItem)
+                                .HasForeignKey<WishlistItem>(x => x.ProductId);
 
         }
 
