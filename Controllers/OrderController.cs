@@ -25,8 +25,21 @@ namespace clothes.api.Controllers
             _orderRepo = orderRepo;
         }
 
+        [HttpGet("getOrderByOrderId")]
+        public IActionResult GetOrderByOrderId(int id)
+        {
 
-        [HttpGet("getAllHistoryOrder")]
+            var order = _orderRepo.GetQueryableNoTracking()
+                .Include(x => x.OrderDetails)
+                .Include(x => x.Payment)
+                .Include(x => x.Promotion)
+                .Include(x => x.Customer)
+                .Where(x => x.Id == id).ToList() ?? throw new ApplicationException("Khong ton tai order ");
+
+            return Ok(_mapper.Map<ICollection<OrderDto>>(order));
+        }
+
+        [HttpGet("GetAllOrderByUserId/{id}")]
         public IActionResult GetAllOrderByUserId(int id)
         {
 

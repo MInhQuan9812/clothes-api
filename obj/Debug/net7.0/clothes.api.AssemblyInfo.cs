@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("clothes.api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9d4c52de4e3f85979ac22d701856c689975eda51")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e80a548e81492af9011e37c2b214a0da8ee8ddcc")]
 [assembly: System.Reflection.AssemblyProductAttribute("clothes.api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("clothes.api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

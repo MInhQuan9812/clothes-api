@@ -35,7 +35,7 @@ namespace clothes.api.Common.Extensions
                  .AddTransient<IHttpContextAccessor, HttpContextAccessor>()
                  .AddDefaultOpenApi(configuration)
                  .AddDefaultAuthentication(configuration)
-                 //.AddLogger(configuration)
+                 .AddLogger(configuration)
                  .AddJwtExtension(configuration);
             //.AddRedisConfiguration(configuration);
             return services;
@@ -158,18 +158,18 @@ namespace clothes.api.Common.Extensions
             return app;
         }
 
-        //public static IServiceCollection AddLogger(this IServiceCollection services, IConfiguration configuration)
-        //{
-        //    var section = configuration.GetSection("Seq");
-        //    if (!section.Exists())
-        //        return services;
+        public static IServiceCollection AddLogger(this IServiceCollection services, IConfiguration configuration)
+        {
+            var section = configuration.GetSection("Seq");
+            if (!section.Exists())
+                return services;
 
-        //    services.AddLogging(loggingBuilder =>
-        //    {
-        //        loggingBuilder.AddSeq(section);
-        //    });
-        //    return services;
-        //}
+            services.AddLogging(loggingBuilder =>
+            {
+                //loggingBuilder.AddSeq(section);
+            });
+            return services;
+        }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
